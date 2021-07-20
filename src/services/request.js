@@ -6,6 +6,6 @@ const request = axios.create({
 });
 
 // request.defaults.baseURL = 'http://localhost:5000/api/v1';
-request.defaults.baseURL = 'http://api.crmviagens.com:5000/api/v1';
+request.defaults.baseURL = 'http://api.crmviagens.com/api/v1';
 
 export default request;
