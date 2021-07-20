@@ -1,25 +1,34 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Route, Switch, Router } from 'react-router-dom';
+
+import Header from './components/layout/Header';
+import Homepage from './components/Home';
+import Login from './components/auth/Login';
+import Footer from './components/layout/Footer';
+import Register from './components/auth/Register';
+import Dashboard from './components/dashboard';
+import SingleTour from './components/singleTour';
+import ScrollToTop from './ScrollToTop';
+import { ProtectedRoute } from './protectedRoute';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	console.log(window.location.origin);
+
+	return (
+		<BrowserRouter>
+			<ScrollToTop />
+			<Header />
+			<main>
+				<Switch>
+					<Route path='/' component={Homepage} exact />
+					<Route path='/auth/login' component={Login} />
+					<Route path='/auth/register' component={Register} />
+					<ProtectedRoute path='/dashboard' component={Dashboard} />
+					<Route path='/tour/:city/:tripid' component={SingleTour} />
+					<Footer />
+				</Switch>
+			</main>
+		</BrowserRouter>
+	);
 }
 
 export default App;
