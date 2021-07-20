@@ -22,7 +22,7 @@ export default function CityTour({ trip }) {
 							<div class='img_container'>
 								<a href={`/tour/${trip.city}/${trip._id}`}>
 									<img
-										src={`http://localhost:5000/uploads/${trip.gallery[0]}`}
+										src={`http://api.crmviagens.com/uploads/${trip.gallery[0]}`}
 										class='img-fluid'
 										alt='Trip Banner'
 									/>

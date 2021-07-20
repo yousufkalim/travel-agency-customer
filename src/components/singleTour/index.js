@@ -81,8 +81,8 @@ function SingleTour({ match, history }) {
 				setImages(
 					data.data.gallery.map((img) => {
 						return {
-							original: 'http://localhost:5000/uploads/' + img,
-							thumbnail: 'http://localhost:5000/uploads/' + img,
+							original: 'http://api.crmviagens.com/uploads/' + img,
+							thumbnail: 'http://api.crmviagens.com/uploads/' + img,
 						};
 					})
 				);

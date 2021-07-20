@@ -5,7 +5,8 @@ import { Link } from 'react-router-dom';
 import auth from '../../auth';
 
 const api = axios.create({
-	baseURL: 'http://localhost:5000/api/v1',
+	// baseURL: 'http://localhost:5000/api/v1',
+	baseURL: 'http://api.crmviagens.com/api/v1',
 });
 function Login(props) {
 	const [input, setInput] = useState({ email: '', password: '' });
