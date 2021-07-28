@@ -6,7 +6,6 @@ import auth from '../../auth';
 const Topbar = (props) => {
 	const handleSingOut = () => {
 		auth.logout(() => {
-			Cookies.remove('AUTH-TOKEN');
 			props.history.push('/auth/login');
 		});
 	};

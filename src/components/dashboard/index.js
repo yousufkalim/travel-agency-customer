@@ -5,7 +5,6 @@ export default function index() {
 	return (
 		<>
 			<SectionHeader />
-
 			<Dashboard />
 		</>
 	);

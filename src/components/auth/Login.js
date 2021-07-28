@@ -3,12 +3,10 @@ import Cookies from 'js-cookie';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import auth from '../../auth';
+import API from '../../services/api';
 
-const api = axios.create({
-	// baseURL: 'http://localhost:5000/api/v1',
-	baseURL: 'http://api.crmviagens.com/api/v1',
-});
 function Login(props) {
+	const [error, setErrror] = useState('');
 	const [input, setInput] = useState({ email: '', password: '' });
 	const [loading, setLoading] = useState(false);
 
@@ -25,10 +23,10 @@ function Login(props) {
 		e.preventDefault();
 
 		if (!input.email || !input.password) {
-			alert('Please enter email and password!');
+			setErrror('Email & Password are required!');
 		} else {
 			setLoading(true);
-			api.post('/auth/login', input)
+			API.login(input)
 				.then((res) => {
 					setLoading(false);
 					const token = res.data.token;
@@ -36,8 +34,8 @@ function Login(props) {
 					auth.login(() => props.history.push('/dashboard'));
 				})
 				.catch(({ response }) => {
-					console.log(response);
-					alert('Wrong email and password!');
+					console.log(response.data.error);
+					setErrror(response.data.error);
 					setLoading(false);
 				});
 		}
@@ -49,9 +47,15 @@ function Login(props) {
 					<div class='col-xl-4 col-lg-5 col-md-6 col-sm-8'>
 						<div id='login'>
 							<div class='text-center'>
-								<img src='img/logo_sticky.png' alt='Logo' data-retina='true' />
+								<img
+									src={`${window.location.origin}/img/logo_sticky.png`}
+									alt='Image'
+									width='160'
+									height='34'
+								/>
 							</div>
 							<hr />
+							{error && <div className='alert alert-danger'>{error}</div>}
 							<form onInvalid onSubmit={onSubmitLoginForm}>
 								{/* <a href='#0' class='social_bt facebook'>
 									Login with Facebook
@@ -85,7 +89,7 @@ function Login(props) {
 									/>
 								</div>
 								<p class='small'>
-									<a href='#'>Forgot Password?</a>
+									<Link to='/auth/forgotPassword'>Forgot Password?</Link>
 								</p>
 
 								<button class='btn_full' type='submit' disabled={loading}>

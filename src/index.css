@@ -58,3 +58,10 @@ ul.list_ok_no li::before {
 .parallax-content-2 {
 	z-index: 0 !important;
 }
+
+.profile_pic {
+	min-height: 250px;
+	min-width: 250px;
+	max-width: 250px;
+	max-height: 250px;
+}

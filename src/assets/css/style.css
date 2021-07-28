@@ -2797,7 +2797,7 @@ ul#contact-info {
 	display: block;
 	text-transform: none;
 	font-size: 12px;
-	background: url(%PUBLIC_URL%/img/bg_login.jpg) no-repeat center center;
+	background: url('http://www.ansonika.com/citytours/img/bg_login.jpg') no-repeat center center;
 	background-size: cover;
 }
 

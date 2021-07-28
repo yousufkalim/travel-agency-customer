@@ -1,8 +1,128 @@
+import { useEffect } from 'react';
+import { useState } from 'react';
+import API from '../../services/api';
+import _ from 'lodash';
+import SweetAlert from 'react-bootstrap-sweetalert';
+import moment from 'moment';
+
 function Dashboard() {
+	useEffect(() => {
+		API.profile().then((res) => {
+			setInput(res.data.user);
+		});
+	}, []);
+
+	const [previewImage, setPreviewImage] = useState('');
+	const handleProfilePicChange = (e) => {
+		const file = e.target.files[0];
+		ImageViewer(file);
+	};
+
+	const ImageViewer = (file) => {
+		const reader = new FileReader();
+		reader.readAsDataURL(file);
+		reader.onloadend = () => {
+			setPreviewImage(reader.result);
+			updateAvatar(reader.result);
+		};
+	};
+
+	const updateAvatar = (base64EncodedImage) => {
+		console.log(base64EncodedImage);
+		API.updateAvatar({ avatar: base64EncodedImage })
+			.then(({ data }) => {
+				setInput(data.user);
+			})
+			.catch((err) => console.log(err.response.data));
+	};
+	const [input, setInput] = useState({
+		avatar: {},
+		fullName: '',
+		email: '',
+		phone: '',
+		birthday: new Date(),
+		gender: '',
+		address: {
+			address: '',
+			city: '',
+			zipcode: '',
+			country: '',
+		},
+	});
+
+	const [notify, setNotify] = useState(false);
+	const handleChange = (e) => {
+		setInput({ ...input, [e.target.name]: e.target.value });
+	};
+
+	const handleAddressChange = (e) => {
+		let inp = { ...input };
+		inp['address'][e.target.name] = e.target.value;
+		setInput(inp);
+	};
+	const handleFormSubmit = (e) => {
+		e.preventDefault();
+		let data = _.omit(
+			input,
+			'isVerified',
+			'isBlocked',
+			'isLocked',
+			'type',
+			'createdAt',
+			'updatedAt',
+			'_id',
+			'__v',
+			'avatar'
+		);
+		API.updateProfile(data).then(({ data }) => {
+			console.log(data);
+			setInput(data.user);
+			setNotify(true);
+		});
+	};
+
+	const [currentPassword, setCurrentPassword] = useState('');
+	const [newPassword, setNewPassword] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
+	const [error, setError] = useState({ type: '', message: '' });
+
+	const updatePasswordForm = (e) => {
+		e.preventDefault();
+		if (!newPassword || !confirmPassword || !currentPassword) {
+			setError({ type: 'danger', message: 'All field are required!' });
+		} else if (newPassword !== confirmPassword) {
+			setError({ type: 'danger', message: 'Confirm password do not match!' });
+		} else {
+			API.updatePassword({ currentPassword, newPassword })
+				.then((res) => {
+					setError({ type: 'success', message: 'Password updated successfully!' });
+				})
+				.catch(({ response }) => {
+					console.log(response.data);
+					setError({ type: 'danger', message: response.data.error });
+				});
+		}
+	};
 	return (
 		<main>
+			{notify && (
+				<SweetAlert
+					style
+					success
+					confirmBtnText='okay'
+					confirmBtnBsStyle='success'
+					title='Profile updated'
+					onConfirm={() => {
+						setNotify(false);
+						window.location.reload();
+					}}
+				>
+					Your Profile as been updated success
+				</SweetAlert>
+			)}
+
 			<div id='position'>
-				<div class='container'>
+				<div className='container'>
 					<ul>
 						<li>
 							<a href='#'>Home</a>
@@ -15,28 +135,46 @@ function Dashboard() {
 				</div>
 			</div>
 
-			<div class='margin_60 container' id='tabs' class='tabs' style={{ marginTop: '50px' }}>
+			<div className='margin_60 container' id='tabs' className='tabs' style={{ marginTop: '50px' }}>
 				<nav>
-					<ul class='nav nav-tabs' id='myTab' role='tablist'>
-						<li class='nav-item'>
-							<a id='home-tab' data-toggle='tab' href='#booking' role='tab' class='nav-link active icon-booking'>
+					<ul className='nav nav-tabs' id='myTab' role='tablist'>
+						<li className='nav-item'>
+							<a
+								id='home-tab'
+								data-toggle='tab'
+								href='#booking'
+								role='tab'
+								className='nav-link active icon-booking'
+							>
 								<span> Bookings</span>
 							</a>
 						</li>
-						<li class='nav-item'>
-							<a class='icon-wishlist nav-link' id='profile-tab' data-toggle='tab' href='#wishlist' role='tab'>
+						<li className='nav-item'>
+							<a
+								className='icon-wishlist nav-link'
+								id='profile-tab'
+								data-toggle='tab'
+								href='#wishlist'
+								role='tab'
+							>
 								<span> Wishlist</span>
 							</a>
 						</li>
-						<li class='nav-item'>
-							<a id='contact-tab' data-toggle='tab' href='#setting' role='tab' class='icon-settings nav-link'>
+						<li className='nav-item'>
+							<a
+								id='contact-tab'
+								data-toggle='tab'
+								href='#setting'
+								role='tab'
+								className='icon-settings nav-link'
+							>
 								<span> Settings</span>
 							</a>
 						</li>
-						<li class='nav-item'>
+						<li className='nav-item'>
 							<a
 								href='#section-4'
-								class='icon-profile nav-link'
+								className='icon-profile nav-link'
 								id='contact-tab'
 								data-toggle='tab'
 								href='#profile'
@@ -49,14 +187,14 @@ function Dashboard() {
 						</li>
 					</ul>
 				</nav>
-				<div class='tab-content' id='myTabContent'>
-					<div class='tab-pane fade show active' id='booking' role='tabpanel' aria-labelledby='home-tab'>
+				<div className='tab-content' id='myTabContent'>
+					<div className='tab-pane fade show active' id='booking' role='tabpanel' aria-labelledby='home-tab'>
 						<div className='content'>
 							<section id='section-1'>
 								<div id='tools'>
-									<div class='row'>
-										<div class='col-lg-2 col-md-3 col-6'>
-											<div class='styled-select-filters'>
+									<div className='row'>
+										<div className='col-lg-2 col-md-3 col-6'>
+											<div className='styled-select-filters'>
 												<select name='sort_type' id='sort_type'>
 													<option value='' selected>
 														Sort by type
@@ -67,8 +205,8 @@ function Dashboard() {
 												</select>
 											</div>
 										</div>
-										<div class='col-lg-2 col-md-3 col-6'>
-											<div class='styled-select-filters'>
+										<div className='col-lg-2 col-md-3 col-6'>
+											<div className='styled-select-filters'>
 												<select name='sort_date' id='sort_date'>
 													<option value='' selected>
 														Sort by date
@@ -81,23 +219,23 @@ function Dashboard() {
 									</div>
 								</div>
 
-								<div class='strip_booking'>
-									<div class='row'>
-										<div class='col-lg-2 col-md-2'>
-											<div class='date'>
-												<span class='month'>Dec</span>
-												<span class='day'>
+								<div className='strip_booking'>
+									<div className='row'>
+										<div className='col-lg-2 col-md-2'>
+											<div className='date'>
+												<span className='month'>Dec</span>
+												<span className='day'>
 													<strong>23</strong>Sat
 												</span>
 											</div>
 										</div>
-										<div class='col-lg-6 col-md-5'>
-											<h3 class='hotel_booking'>
+										<div className='col-lg-6 col-md-5'>
+											<h3 className='hotel_booking'>
 												Hotel Mariott Paris<span>2 Adults / 2 Nights</span>
 											</h3>
 										</div>
-										<div class='col-lg-2 col-md-3'>
-											<ul class='info_booking'>
+										<div className='col-lg-2 col-md-3'>
+											<ul className='info_booking'>
 												<li>
 													<strong>Booking id</strong> 23442
 												</li>
@@ -106,126 +244,12 @@ function Dashboard() {
 												</li>
 											</ul>
 										</div>
-										<div class='col-lg-2 col-md-2'>
-											<div class='booking_buttons'>
-												<a href='#0' class='btn_2'>
+										<div className='col-lg-2 col-md-2'>
+											<div className='booking_buttons'>
+												<a href='#0' className='btn_2'>
 													Edit
 												</a>
-												<a href='#0' class='btn_3'>
-													Cancel
-												</a>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div class='strip_booking'>
-									<div class='row'>
-										<div class='col-lg-2 col-md-2'>
-											<div class='date'>
-												<span class='month'>Dec</span>
-												<span class='day'>
-													<strong>27</strong>Fri
-												</span>
-											</div>
-										</div>
-										<div class='col-lg-6 col-md-5'>
-											<h3 class='tours_booking'>
-												Louvre Museum<span>2 Adults / 2 Childs</span>
-											</h3>
-										</div>
-										<div class='col-lg-2 col-md-3'>
-											<ul class='info_booking'>
-												<li>
-													<strong>Booking id</strong> 23442
-												</li>
-												<li>
-													<strong>Booked on</strong> Sat. 20 Dec. 2015
-												</li>
-											</ul>
-										</div>
-										<div class='col-lg-2 col-md-2'>
-											<div class='booking_buttons'>
-												<a href='#0' class='btn_2'>
-													Edit
-												</a>
-												<a href='#0' class='btn_3'>
-													Cancel
-												</a>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div class='strip_booking'>
-									<div class='row'>
-										<div class='col-lg-2 col-md-2'>
-											<div class='date'>
-												<span class='month'>Dec</span>
-												<span class='day'>
-													<strong>28</strong>Fri
-												</span>
-											</div>
-										</div>
-										<div class='col-lg-6 col-md-5'>
-											<h3 class='tours_booking'>
-												Tour Eiffel<span>2 Adults</span>
-											</h3>
-										</div>
-										<div class='col-lg-2 col-md-3'>
-											<ul class='info_booking'>
-												<li>
-													<strong>Booking id</strong> 23442
-												</li>
-												<li>
-													<strong>Booked on</strong> Sat. 20 Dec. 2015
-												</li>
-											</ul>
-										</div>
-										<div class='col-lg-2 col-md-2'>
-											<div class='booking_buttons'>
-												<a href='#0' class='btn_2'>
-													Edit
-												</a>
-												<a href='#0' class='btn_3'>
-													Cancel
-												</a>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div class='strip_booking'>
-									<div class='row'>
-										<div class='col-lg-2 col-md-2'>
-											<div class='date'>
-												<span class='month'>Dec</span>
-												<span class='day'>
-													<strong>30</strong>Fri
-												</span>
-											</div>
-										</div>
-										<div class='col-lg-6 col-md-5'>
-											<h3 class='transfers_booking'>
-												Orly Airport<span>2 Adults / 2Childs</span>
-											</h3>
-										</div>
-										<div class='col-lg-2 col-md-3'>
-											<ul class='info_booking'>
-												<li>
-													<strong>Booking id</strong> 23442
-												</li>
-												<li>
-													<strong>Booked on</strong> Sat. 20 Dec. 2015
-												</li>
-											</ul>
-										</div>
-										<div class='col-lg-2 col-md-2'>
-											<div class='booking_buttons'>
-												<a href='#0' class='btn_2'>
-													Edit
-												</a>
-												<a href='#0' class='btn_3'>
+												<a href='#0' className='btn_3'>
 													Cancel
 												</a>
 											</div>
@@ -235,300 +259,152 @@ function Dashboard() {
 							</section>
 						</div>
 					</div>
-					<div class='tab-pane fade content' id='wishlist' role='tabpanel' aria-labelledby='profile-tab'>
+					<div className='tab-pane fade content' id='wishlist' role='tabpanel' aria-labelledby='profile-tab'>
 						<section id='section-2'>
-							<div class='row'>
-								<div class='col-lg-4 col-md-6'>
-									<div class='hotel_container'>
-										<div class='img_container'>
+							<div className='row'>
+								<div className='col-lg-4 col-md-6'>
+									<div className='hotel_container'>
+										<div className='img_container'>
 											<a href='single_hotel.html'>
-												<img src='img/hotel_1.jpg' width='800' height='533' class='img-fluid' alt='Image' />
-												<div class='ribbon top_rated'></div>
-												<div class='score'>
+												<img
+													src='img/hotel_1.jpg'
+													width='800'
+													height='533'
+													className='img-fluid'
+													alt='Image'
+												/>
+												<div className='ribbon top_rated'></div>
+												<div className='score'>
 													<span>7.5</span>Good
 												</div>
-												<div class='short_info hotel'>
+												<div className='short_info hotel'>
 													From/Per night
-													<span class='price'>
+													<span className='price'>
 														<sup>$</sup>59
 													</span>
 												</div>
 											</a>
 										</div>
-										<div class='hotel_title'>
+										<div className='hotel_title'>
 											<h3>
 												<strong>Park Hyatt</strong> Hotel
 											</h3>
-											<div class='rating'>
-												<i class='icon-star voted'></i>
-												<i class='icon-star voted'></i>
-												<i class='icon-star voted'></i>
-												<i class='icon-star voted'></i>
-												<i class='icon-star-empty'></i>
+											<div className='rating'>
+												<i className='icon-star voted'></i>
+												<i className='icon-star voted'></i>
+												<i className='icon-star voted'></i>
+												<i className='icon-star voted'></i>
+												<i className='icon-star-empty'></i>
 											</div>
 
-											<div class='wishlist_close_admin'>-</div>
-										</div>
-									</div>
-								</div>
-
-								<div class='col-lg-4 col-md-6 '>
-									<div class='hotel_container'>
-										<div class='img_container'>
-											<a href='single_hotel.html'>
-												<img src='img/hotel_2.jpg' width='800' height='533' class='img-fluid' alt='Image' />
-												<div class='ribbon top_rated'></div>
-												<div class='score'>
-													<span>9.0</span>Superb
-												</div>
-												<div class='short_info hotel'>
-													From/Per night
-													<span class='price'>
-														<sup>$</sup>45
-													</span>
-												</div>
-											</a>
-										</div>
-										<div class='hotel_title'>
-											<h3>
-												<strong>Mariott</strong> Hotel
-											</h3>
-											<div class='rating'>
-												<i class='icon-star voted'></i>
-												<i class='icon-star voted'></i>
-												<i class='icon-star voted'></i>
-												<i class='icon-star voted'></i>
-												<i class='icon-star-empty'></i>
-											</div>
-
-											<div class='wishlist_close_admin'>-</div>
-										</div>
-									</div>
-								</div>
-
-								<div class='col-lg-4 col-md-6'>
-									<div class='tour_container'>
-										<div class='img_container'>
-											<a href='single_tour.html'>
-												<img
-													src='img/tour_box_1.jpg'
-													width='800'
-													height='533'
-													class='img-fluid'
-													alt='Image'
-												/>
-												<div class='ribbon top_rated'></div>
-												<div class='short_info'>
-													<i class='icon_set_1_icon-44'></i>Historic Buildings
-													<span class='price'>
-														<sup>$</sup>45
-													</span>
-												</div>
-											</a>
-										</div>
-										<div class='tour_title'>
-											<h3>
-												<strong>Arc Triomphe</strong> tour
-											</h3>
-											<div class='rating'>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile'></i>
-												<small>(75)</small>
-											</div>
-
-											<div class='wishlist_close_admin'>-</div>
-										</div>
-									</div>
-								</div>
-
-								<div class='col-lg-4 col-md-6'>
-									<div class='tour_container'>
-										<div class='img_container'>
-											<a href='single_tour.html'>
-												<img
-													src='img/tour_box_3.jpg'
-													width='800'
-													height='533'
-													class='img-fluid'
-													alt='Image'
-												/>
-												<div class='ribbon popular'></div>
-												<div class='short_info'>
-													<i class='icon_set_1_icon-44'></i>Historic Buildings
-													<span class='price'>
-														<sup>$</sup>45
-													</span>
-												</div>
-											</a>
-										</div>
-										<div class='tour_title'>
-											<h3>
-												<strong>Versailles</strong> tour
-											</h3>
-											<div class='rating'>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile'></i>
-												<small>(75)</small>
-											</div>
-
-											<div class='wishlist_close_admin'>-</div>
-										</div>
-									</div>
-								</div>
-
-								<div class='col-lg-4 col-md-6'>
-									<div class='tour_container'>
-										<div class='img_container'>
-											<a href='single_tour.html'>
-												<img
-													src='img/tour_box_4.jpg'
-													width='800'
-													height='533'
-													class='img-fluid'
-													alt='Image'
-												/>
-												<div class='ribbon popular'></div>
-												<div class='short_info'>
-													<i class='icon_set_1_icon-30'></i>Walking tour
-													<span class='price'>
-														<sup>$</sup>45
-													</span>
-												</div>
-											</a>
-										</div>
-										<div class='tour_title'>
-											<h3>
-												<strong>Pompidue</strong> tour
-											</h3>
-											<div class='rating'>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile'></i>
-												<small>(75)</small>
-											</div>
-
-											<div class='wishlist_close_admin'>-</div>
-										</div>
-									</div>
-								</div>
-
-								<div class='col-lg-4 col-md-6'>
-									<div class='transfer_container'>
-										<div class='img_container'>
-											<a href='single_transfer.html'>
-												<img
-													src='img/transfer_1.jpg'
-													width='800'
-													height='533'
-													class='img-fluid'
-													alt='Image'
-												/>
-												<div class='ribbon top_rated'></div>
-												<div class='short_info'>
-													From/Per person
-													<span class='price'>
-														<sup>$</sup>45
-													</span>
-												</div>
-											</a>
-										</div>
-										<div class='transfer_title'>
-											<h3>
-												<strong>Orly Airport</strong> private
-											</h3>
-											<div class='rating'>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile voted'></i>
-												<i class='icon-smile'></i>
-												<small>(75)</small>
-											</div>
-
-											<div class='wishlist_close_admin'>-</div>
+											<div className='wishlist_close_admin'>-</div>
 										</div>
 									</div>
 								</div>
 							</div>
 
-							<button type='submit' class='btn_1 green'>
+							<button type='submit' className='btn_1 green'>
 								Update wishlist
 							</button>
 						</section>
 					</div>
-					<div class='tab-pane fade content' id='setting' role='tabpanel' aria-labelledby='contact-tab'>
+					<div className='tab-pane fade content' id='setting' role='tabpanel' aria-labelledby='contact-tab'>
 						<section id='section-3'>
-							<div class='row'>
-								<div class='col-md-6 add_bottom_30'>
-									<h4>Change your password</h4>
-									<div class='form-group'>
-										<label>Old password</label>
-										<input class='form-control' name='old_password' id='old_password' type='password' />
+							<form noValidate onSubmit={updatePasswordForm}>
+								<div className='row'>
+									<div className='col-md-12'>
+										<h4>Change your password</h4>
 									</div>
-									<div class='form-group'>
-										<label>New password</label>
-										<input class='form-control' name='new_password' id='new_password' type='password' />
+									<div className='col-md-4 '>
+										<div className='form-group'>
+											<label>Old password</label>
+											<input
+												className='form-control'
+												onChange={(e) => setCurrentPassword(e.target.value)}
+												value={currentPassword}
+												type='password'
+											/>
+										</div>
 									</div>
-									<div class='form-group'>
-										<label>Confirm new password</label>
-										<input
-											class='form-control'
-											name='confirm_new_password'
-											id='confirm_new_password'
-											type='password'
-										/>
+									<div className='col-md-4'>
+										<div className='form-group'>
+											<label>New password</label>
+											<input
+												className='form-control'
+												onChange={(e) => setNewPassword(e.target.value)}
+												value={newPassword}
+												type='password'
+											/>
+										</div>
 									</div>
-									<button type='submit' class='btn_1 green'>
-										Update Password
-									</button>
+									<div className='col-md-4'>
+										<div className='form-group'>
+											<label>Confirm new password</label>
+											<input
+												className='form-control'
+												onChange={(e) => setConfirmPassword(e.target.value)}
+												value={confirmPassword}
+												type='password'
+											/>
+										</div>
+									</div>
+									<div className='col-md-6 add_bottom_30 d-none'>
+										<h4>Change your email</h4>
+										<div className='form-group'>
+											<label>Old email</label>
+											<input
+												className='form-control'
+												name='old_password'
+												id='old_password'
+												type='password'
+											/>
+										</div>
+										<div className='form-group'>
+											<label>New email</label>
+											<input
+												className='form-control'
+												name='new_password'
+												id='new_password'
+												type='password'
+											/>
+										</div>
+										<div className='form-group'>
+											<label>Confirm new email</label>
+											<input
+												className='form-control'
+												name='confirm_new_password'
+												id='confirm_new_password'
+												type='password'
+											/>
+										</div>
+										<button type='submit' className='btn_1 green'>
+											Update Email
+										</button>
+									</div>
 								</div>
-								<div class='col-md-6 add_bottom_30'>
-									<h4>Change your email</h4>
-									<div class='form-group'>
-										<label>Old email</label>
-										<input class='form-control' name='old_password' id='old_password' type='password' />
+								<div className='row'>
+									<div className='col-md-6'>
+										{error.message && <div className={`alert alert-${error.type}`}>{error.message}</div>}
 									</div>
-									<div class='form-group'>
-										<label>New email</label>
-										<input class='form-control' name='new_password' id='new_password' type='password' />
+									<div className='col-md-6'>
+										<button type='submit' className='btn_1 green float-right'>
+											Update Password
+										</button>
 									</div>
-									<div class='form-group'>
-										<label>Confirm new email</label>
-										<input
-											class='form-control'
-											name='confirm_new_password'
-											id='confirm_new_password'
-											type='password'
-										/>
-									</div>
-									<button type='submit' class='btn_1 green'>
-										Update Email
-									</button>
 								</div>
-							</div>
-
-							<hr />
-							<br />
-							<div class='row'>
-								<div class='col-lg-6'>
+							</form>
+							<div className='row d-none'>
+								<div className='col-lg-6'>
 									<h4>Notification settings</h4>
-									<table class='table table-striped options_cart'>
+									<table className='table table-striped options_cart'>
 										<tbody>
 											<tr>
 												<td style={{ width: '10%' }}>
-													<i class='icon_set_1_icon-33'></i>
+													<i className='icon_set_1_icon-33'></i>
 												</td>
 												<td style={{ width: '60%' }}>New Citytours Tours</td>
 												<td style={{ width: '35%' }}>
-													<label class='switch-light switch-ios pull-right'>
+													<label className='switch-light switch-ios pull-right'>
 														<input type='checkbox' name='option_1' id='option_1' checked value='' />
 														<span>
 															<span>No</span>
@@ -540,11 +416,11 @@ function Dashboard() {
 											</tr>
 											<tr>
 												<td>
-													<i class='icon_set_1_icon-6'></i>
+													<i className='icon_set_1_icon-6'></i>
 												</td>
 												<td>New Citytours Hotels</td>
 												<td>
-													<label class='switch-light switch-ios pull-right'>
+													<label className='switch-light switch-ios pull-right'>
 														<input type='checkbox' name='option_2' id='option_2' value='' />
 														<span>
 															<span>No</span>
@@ -556,11 +432,11 @@ function Dashboard() {
 											</tr>
 											<tr>
 												<td>
-													<i class='icon_set_1_icon-26'></i>
+													<i className='icon_set_1_icon-26'></i>
 												</td>
 												<td>New Citytours Transfers</td>
 												<td>
-													<label class='switch-light switch-ios pull-right'>
+													<label className='switch-light switch-ios pull-right'>
 														<input type='checkbox' name='option_3' id='option_3' value='' checked />
 														<span>
 															<span>No</span>
@@ -572,11 +448,11 @@ function Dashboard() {
 											</tr>
 											<tr>
 												<td>
-													<i class='icon_set_1_icon-81'></i>
+													<i className='icon_set_1_icon-81'></i>
 												</td>
 												<td>New Citytours special offers</td>
 												<td>
-													<label class='switch-light switch-ios pull-right'>
+													<label className='switch-light switch-ios pull-right'>
 														<input type='checkbox' name='option_4' id='option_4' value='' />
 														<span>
 															<span>No</span>
@@ -588,143 +464,223 @@ function Dashboard() {
 											</tr>
 										</tbody>
 									</table>
-									<button type='submit' class='btn_1 green'>
+									<button type='submit' className='btn_1 green'>
 										Update notifications settings
 									</button>
 								</div>
 							</div>
 						</section>
 					</div>
-					<div class='tab-pane fade content' id='profile' role='tabpanel' aria-labelledby='profile-tab'>
+					<div className='tab-pane fade content' id='profile' role='tabpanel' aria-labelledby='profile-tab'>
 						<section id='section-4'>
-							<div class='row'>
-								<div class='col-md-6'>
+							<div className='row'>
+								<div className='col-md-6'>
 									<h4>Your profile</h4>
 									<ul id='profile_summary'>
 										<li>
-											Username <span>info@clara.com</span>
+											Full Name <span>{input.fullName}</span>
 										</li>
 										<li>
-											First name <span>Clara</span>
+											Email <span>{input.email}</span>
 										</li>
 										<li>
-											Last name <span>Tomson</span>
+											Phone number <span>{input?.phone}</span>
 										</li>
 										<li>
-											Phone number <span>+00 032 42366</span>
+											Date of birth <span>{moment(input?.birthday).format('DD-MMMM-yyyy')}</span>
 										</li>
 										<li>
-											Date of birth <span>13/04/1975</span>
+											Gender <span>{input?.gender}</span>
 										</li>
 										<li>
-											Street address <span>24 Rue de Rivoli</span>
+											Address <span>{input?.address?.address}</span>
 										</li>
 										<li>
-											Town/City <span>Paris</span>
+											Town/City <span>{input?.address?.city}</span>
 										</li>
 										<li>
-											Zip code <span>002843</span>
+											Zip code <span>{input?.address?.zipcode}</span>
 										</li>
 										<li>
-											Country <span>France</span>
+											Country <span>{input?.address?.country}</span>
+										</li>
+										<li>
+											Verified <span>{input?.isVerified ? 'Yes' : 'No'}</span>
 										</li>
 									</ul>
 								</div>
-								<div class='col-md-6'>
-									<p>
-										<img src='img/tourist_guide_pic.jpg' alt='Image' class='img-fluid styled profile_pic' />
-									</p>
-								</div>
-							</div>
-
-							<div class='divider'></div>
-
-							<div class='row'>
-								<div class='col-md-12'>
-									<h4>Edit profile</h4>
-								</div>
-								<div class='col-md-6'>
-									<div class='form-group'>
-										<label>First name</label>
-										<input class='form-control' name='first_name' id='first_name' type='text' />
+								<div className='col-md-6'>
+									<div className='row'>
+										<div className='col-md-12'>
+											<img
+												src={`${input.avatar?.url || 'img/tourist_guide_pic.jpg'}`}
+												alt='Profile picture'
+												className='img-fluid styled profile_pic'
+												width='250'
+												height='250'
+											/>
+										</div>
 									</div>
-								</div>
-								<div class='col-md-6'>
-									<div class='form-group'>
-										<label>Last name</label>
-										<input class='form-control' name='last_name' id='last_name' type='text' />
+									<div className='row'>
+										<div className='col-md-6 offset-md-6'>
+											<input type='file' className='form-control' onChange={handleProfilePicChange} />
+										</div>
 									</div>
 								</div>
 							</div>
 
-							<div class='row'>
-								<div class='col-md-6'>
-									<div class='form-group'>
-										<label>Phone number</label>
-										<input class='form-control' name='email_2' id='email_2' type='text' />
+							<div className='divider'></div>
+							<form noValidate onSubmit={handleFormSubmit}>
+								<div className='row'>
+									<div className='col-md-12'>
+										<h4>Edit profile</h4>
+									</div>
+									<div className='col-md-6'>
+										<div className='form-group'>
+											<label>Full Name</label>
+											<input
+												className='form-control'
+												name='fullName'
+												type='text'
+												onChange={handleChange}
+												value={input.fullName}
+											/>
+										</div>
+									</div>
+									<div className='col-md-6'>
+										<div className='form-group'>
+											<label>Email</label>
+											<input className='form-control' value={input.email} type='email' disabled />
+										</div>
 									</div>
 								</div>
-								<div class='col-md-6'>
-									<div class='form-group'>
-										<label>
-											Date of birth <small>(dd/mm/yyyy)</small>
-										</label>
-										<input class='form-control' name='email' id='email' type='text' />
-									</div>
-								</div>
-							</div>
 
-							<hr />
-							<div class='row'>
-								<div class='col-md-12'>
-									<h4>Edit address</h4>
-								</div>
-								<div class='col-md-6'>
-									<div class='form-group'>
-										<label>Street address</label>
-										<input class='form-control' name='first_name' id='first_name' type='text' />
+								<div className='row'>
+									<div className='col-md-3'>
+										<div className='form-group'>
+											<label>Phone number</label>
+											<input
+												className='form-control'
+												name='phone'
+												type='text'
+												onChange={handleChange}
+												value={input.phone}
+											/>
+										</div>
 									</div>
-								</div>
-								<div class='col-md-6'>
-									<div class='form-group'>
-										<label>City/Town</label>
-										<input class='form-control' name='last_name' id='last_name' type='text' />
+									<div className='col-md-3'>
+										<div className='form-group'>
+											<label>
+												Date of birth <small>(mm/dd/yyyy)</small>
+											</label>
+											<input
+												className='form-control'
+												name='birthday'
+												type='date'
+												onChange={handleChange}
+												value={input.birthday}
+											/>
+										</div>
 									</div>
-								</div>
-							</div>
+									<div className='col-md-3'>
+										<div className='form-group'>
+											<label>Gender</label>
 
-							<div class='row'>
-								<div class='col-md-6'>
-									<div class='form-group'>
-										<label>Zip code</label>
-										<input class='form-control' name='email' id='email' type='text' />
+											<select
+												className='form-control'
+												name='gender'
+												onChange={handleChange}
+												value={input.gender}
+											>
+												<option value='Male'>Male</option>
+												<option value='Female'>Female</option>
+												<option value='Others'>Others</option>
+											</select>
+										</div>
 									</div>
-								</div>
-								<div class='col-md-6'>
-									<div class='form-group'>
-										<label>Country</label>
-										<select id='country' class='form-control' name='country'>
+									<div className='col-md-3'>
+										<div className='form-group'>
+											<label>Country</label>
+											<input
+												className='form-control'
+												name='country'
+												type='text'
+												onChange={handleAddressChange}
+												value={input.address?.country}
+											/>
+											{/* <select id='country' className='form-control' name='country'>
 											<option value=''>Select...</option>
-										</select>
+										</select> */}
+										</div>
 									</div>
 								</div>
 
 								<hr />
-								<h4>Upload profile photo</h4>
-								<div class='form-inline upload_1'>
-									<div class='form-group'>
-										<input type='file' name='files[]' id='js-upload-files' multiple />
+								<div className='row'>
+									<div className='col-md-12'>
+										<h4>Edit address</h4>
 									</div>
-									<button type='submit' class='btn_1 green' id='js-upload-submit'>
-										Upload file
-									</button>
+									<div className='col-md-6'>
+										<div className='form-group'>
+											<label>Address</label>
+											<input
+												className='form-control'
+												name='address'
+												type='text'
+												onChange={handleAddressChange}
+												value={input.address?.address}
+											/>
+										</div>
+									</div>
+									<div className='col-md-3'>
+										<div className='form-group'>
+											<label>City/Town</label>
+											<input
+												className='form-control'
+												name='city'
+												type='text'
+												onChange={handleAddressChange}
+												value={input.address?.city}
+											/>
+										</div>
+									</div>
+									<div className='col-md-3'>
+										<div className='form-group'>
+											<label>Zipcode</label>
+											<input
+												className='form-control'
+												name='zipcode'
+												type='text'
+												onChange={handleAddressChange}
+												value={input.address?.zipcode}
+											/>
+										</div>
+									</div>
 								</div>
 
+								{/* <hr />
+								<div className='row'>
+									<div className='col-md-12'>
+										<h4>Upload photo</h4>
+										<div className='form-inline upload_1'>
+											<div className='form-group'>
+												<input type='file' name='files[]' id='js-upload-files' multiple />
+											</div>
+											<button type='submit' className='btn_1 green' id='js-upload-submit'>
+												Upload file
+											</button>
+										</div>
+									</div>
+								</div> */}
 								<hr />
-								<button type='submit' class='btn_1 green'>
-									Update Profile
-								</button>
-							</div>
+								<div className='row'>
+									<div className='col-md-12'>
+										<button type='submit' className='btn btn-info float-right'>
+											Update Profile
+										</button>
+									</div>
+								</div>
+							</form>
 						</section>
 					</div>
 				</div>

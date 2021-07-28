@@ -2,12 +2,7 @@ import Cookies from 'js-cookie';
 
 class Auth {
 	constructor() {
-		var token = Cookies.get('AUTH-TOKEN');
-		if (token) {
-			this.authenticated = true;
-		} else {
-			this.authenticated = false;
-		}
+		this.authenticated = false;
 	}
 
 	login(cb) {
@@ -17,11 +12,17 @@ class Auth {
 
 	logout(cb) {
 		this.authenticated = false;
+		Cookies.remove('AUTH-TOKEN');
 		cb();
 	}
 
 	isAuthenticated() {
-		return this.authenticated;
+		var token = Cookies.get('AUTH-TOKEN');
+		if (token && token !== undefined) {
+			return (this.authenticated = true);
+		} else {
+			return this.authenticated;
+		}
 	}
 }
 

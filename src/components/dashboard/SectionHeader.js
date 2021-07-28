@@ -19,16 +19,17 @@ function parseJwt(token) {
 export default function SectionHeader() {
 	const [user, setUser] = useState({});
 	useEffect(() => {
-		var user = parseJwt(Cookies.get('AUTH-TOKEN'));
-		setUser(user);
-	});
+		const token = Cookies.get('AUTH-TOKEN');
+		if (token) {
+			var user = parseJwt(token);
+			setUser(user);
+		}
+	}, []);
 	return (
 		<section
-			class='parallax-window'
-			data-parallax='scroll'
-			data-image-src='img/admin_top.jpg'
-			data-natural-width='1400'
-			data-natural-height='470'
+			style={{
+				background: `url(http://www.ansonika.com/citytours/img/slide_hero_2.jpg)`,
+			}}
 		>
 			<div class='parallax-content-1'>
 				<div class='animated fadeInDown'>
