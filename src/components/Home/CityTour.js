@@ -40,7 +40,7 @@ export default function CityTour({ trip }) {
 							</div>
 							<div class='tour_title'>
 								<h3>
-									<strong>{trip.title}</strong> tour
+									<strong>{trip.name}</strong> tour
 								</h3>
 								<Rating value={4} count={50} />
 								<AddToWish />
