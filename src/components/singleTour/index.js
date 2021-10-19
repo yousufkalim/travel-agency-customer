@@ -10,6 +10,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import API from '../../services/api';
 
 import BookingForm from './components/BookingForm';
+import MultipleDayBooking from './components/MultipleDayBooking';
 
 function SingleTour({ match, history }) {
 	const [trip, setTrip] = useState({});
@@ -448,7 +449,14 @@ function SingleTour({ match, history }) {
 									View on map
 								</a>
 							</p> */}
-							<BookingForm trip={trip} />
+							{trip.category === 'Cruises' ? (
+								<BookingForm trip={trip} />
+							) : trip.category === 'Multiple Day' ? (
+								<MultipleDayBooking trip={trip} />
+							) : (
+								'Hello'
+							)}
+
 							<div className='box_style_4'>
 								<i className='icon_set_1_icon-90'></i>
 								<h4>
