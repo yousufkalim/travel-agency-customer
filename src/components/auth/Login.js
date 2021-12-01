@@ -1,63 +1,63 @@
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import auth from '../../auth';
-import API from '../../services/api';
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import auth from "../../auth";
+import API from "../../services/api";
 
 function Login(props) {
-	const [error, setErrror] = useState('');
-	const [input, setInput] = useState({ email: '', password: '' });
-	const [loading, setLoading] = useState(false);
+  const [error, setErrror] = useState("");
+  const [input, setInput] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
-	useEffect(() => {
-		if (auth.isAuthenticated()) {
-			props.history.push('/dashboard');
-		}
-	}, []);
-	const onChange = (e) => {
-		setInput({ ...input, [e.target.name]: e.target.value });
-	};
+  useEffect(() => {
+    if (auth.isAuthenticated()) {
+      props.history.push("/dashboard");
+    }
+  }, []);
+  const onChange = (e) => {
+    setInput({ ...input, [e.target.name]: e.target.value });
+  };
 
-	const onSubmitLoginForm = (e) => {
-		e.preventDefault();
+  const onSubmitLoginForm = (e) => {
+    e.preventDefault();
 
-		if (!input.email || !input.password) {
-			setErrror('Email & Password are required!');
-		} else {
-			setLoading(true);
-			API.login(input)
-				.then((res) => {
-					setLoading(false);
-					const token = res.data.token;
-					Cookies.set('AUTH-TOKEN', token, { expires: 30 });
-					auth.login(() => props.history.push('/dashboard'));
-				})
-				.catch(({ response }) => {
-					console.log(response.data.error);
-					setErrror(response.data.error);
-					setLoading(false);
-				});
-		}
-	};
-	return (
-		<section id='hero' class='login'>
-			<div class='container'>
-				<div class='row justify-content-center'>
-					<div class='col-xl-4 col-lg-5 col-md-6 col-sm-8'>
-						<div id='login'>
-							<div class='text-center'>
-								<img
-									src={`${window.location.origin}/img/logo_sticky.png`}
-									alt='Image'
-									width='160'
-									height='34'
-								/>
-							</div>
-							<hr />
-							{error && <div className='alert alert-danger'>{error}</div>}
-							<form onInvalid onSubmit={onSubmitLoginForm}>
-								{/* <a href='#0' class='social_bt facebook'>
+    if (!input.email || !input.password) {
+      setErrror("Email & Password are required!");
+    } else {
+      setLoading(true);
+      API.login(input)
+        .then((res) => {
+          setLoading(false);
+          const token = res.data.token;
+          Cookies.set("AUTH-TOKEN", token, { expires: 30 });
+          auth.login(() => props.history.push("/dashboard"));
+        })
+        .catch(({ response }) => {
+          console.log(response.data.error);
+          setErrror(response.data.error);
+          setLoading(false);
+        });
+    }
+  };
+  return (
+    <section id="hero" class="login">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-xl-4 col-lg-5 col-md-6 col-sm-8">
+            <div id="login">
+              <div class="text-center">
+                <img
+                  src={`${window.location.origin}/img/logo_sticky.png`}
+                  alt="Image"
+                  width="160"
+                  height="34"
+                />
+              </div>
+              <hr />
+              {error && <div className="alert alert-danger">{error}</div>}
+              <form onInvalid onSubmit={onSubmitLoginForm}>
+                {/* <a href='#0' class='social_bt facebook'>
 									Login with Facebook
 								</a>
 								<a href='#0' class='social_bt google'>
@@ -66,45 +66,45 @@ function Login(props) {
 								<div class='divider'>
 									<span>Or</span>
 								</div> */}
-								<div class='form-group'>
-									<label>Email</label>
-									<input
-										type='email'
-										class=' form-control '
-										placeholder='Email'
-										name='email'
-										value={input.email}
-										onChange={onChange}
-									/>
-								</div>
-								<div class='form-group'>
-									<label>Password</label>
-									<input
-										type='password'
-										class=' form-control'
-										placeholder='Password'
-										name='password'
-										value={input.password}
-										onChange={onChange}
-									/>
-								</div>
-								<p class='small'>
-									<Link to='/auth/forgotPassword'>Forgot Password?</Link>
-								</p>
+                <div class="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    class=" form-control "
+                    placeholder="Email"
+                    name="email"
+                    value={input.email}
+                    onChange={onChange}
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    class=" form-control"
+                    placeholder="Password"
+                    name="password"
+                    value={input.password}
+                    onChange={onChange}
+                  />
+                </div>
+                <p class="small">
+                  <Link to="/auth/forgotPassword">Forgot Password?</Link>
+                </p>
 
-								<button class='btn_full' type='submit' disabled={loading}>
-									Sign in {loading && <i class='icon-spinner'></i>}
-								</button>
-								<Link to='/auth/register' class='btn_full_outline'>
-									Register
-								</Link>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
-	);
+                <button class="btn_full" type="submit" disabled={loading}>
+                  Sign in {loading && <i class="icon-spinner"></i>}
+                </button>
+                <Link to="/auth/register" class="btn_full_outline">
+                  Register
+                </Link>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export default Login;
