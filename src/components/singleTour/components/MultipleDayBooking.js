@@ -199,10 +199,21 @@ const MultipleDayBooking = ({ trip }) => {
       }
 
       const result = await API.addBooking(data, trip._id);
-
-      if (result.data.agency.subscription.type === "Beginner") {
-        handleClose();
-      } else {
+      toast.success("Trip Booked!", { position: "bottom-right" });
+      handleClose();
+      setValues({
+        fullName: "",
+        email: "",
+        phone: "",
+        address: "",
+        comment: "",
+        bookingDate: new Date(),
+        newsletter: false,
+        adult: [],
+        children: [],
+        totalCost: 0,
+      });
+      if (result.data.agency.subscription.type !== "Beginner") {
         ///handle checkout here
         let body = {
           line_items: [
@@ -226,12 +237,13 @@ const MultipleDayBooking = ({ trip }) => {
         };
         const checkoutResult = await API.checkout(body);
         setStripeUrl(checkoutResult.data.url);
-        handleClose();
         setStatusModal(true);
       }
-      toast.success("Trip Booked!", { position: "bottom-right" });
     } catch (error) {
-      toast.error(error.response.data.error, { position: "bottom-right" });
+      toast.error(error?.response?.data?.error, { position: "bottom-right" });
+      toast.error(error?.response?.data?.raw?.message, {
+        position: "bottom-right",
+      });
     }
   };
 
