@@ -72,6 +72,20 @@ export const updateProfile = (id, payload) => {
   });
 };
 
+// checkout action
+export const allAgencies = async () => {
+  return request.get("/agency/getAll", {
+    withCredentials: true,
+  });
+};
+
+// get trip by id of agency
+export const getTripByAgencyId = (id) => {
+  return request.get(`/trips/getTripByAgencyId/${id}`, {
+    withCredentials: true,
+  });
+};
+
 export default {
   login,
   register,
