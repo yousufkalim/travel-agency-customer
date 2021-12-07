@@ -4,15 +4,21 @@ import API from "../../services/api";
 import _ from "lodash";
 import SweetAlert from "react-bootstrap-sweetalert";
 import moment from "moment";
+import { updateProfile } from "../../services/api";
 
-function Dashboard() {
+function Dashboard({ user, setUser }) {
+  ///states
+  const [input, setInput] = useState();
+  const [notify, setNotify] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState({ type: "", message: "" });
+
+  // setting user for input fields
   useEffect(() => {
-    API.profile().then((res) => {
-      setInput(res.data.user);
-    });
-  }, []);
-
-  const [previewImage, setPreviewImage] = useState("");
+    setInput(user);
+  }, [user]);
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     ImageViewer(file);
@@ -22,7 +28,6 @@ function Dashboard() {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onloadend = () => {
-      setPreviewImage(reader.result);
       updateAvatar(reader.result);
     };
   };
@@ -35,57 +40,44 @@ function Dashboard() {
       })
       .catch((err) => console.log(err.response.data));
   };
-  const [input, setInput] = useState({
-    avatar: {},
-    fullName: "",
-    email: "",
-    phone: "",
-    birthday: new Date(),
-    gender: "",
-    address: {
-      address: "",
-      city: "",
-      zipcode: "",
-      country: "",
-    },
-  });
 
-  const [notify, setNotify] = useState(false);
   const handleChange = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
 
   const handleAddressChange = (e) => {
-    let inp = { ...input };
-    inp["address"][e.target.name] = e.target.value;
-    setInput(inp);
-  };
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    let data = _.omit(
-      input,
-      "isVerified",
-      "isBlocked",
-      "isLocked",
-      "type",
-      "createdAt",
-      "updatedAt",
-      "_id",
-      "__v",
-      "avatar"
-    );
-    API.updateProfile(data).then(({ data }) => {
-      console.log(data);
-      setInput(data.user);
-      setNotify(true);
+    setInput((prev) => {
+      return {
+        ...prev,
+        address: {
+          ...prev.address,
+          [e.target.name]: e.target.value,
+        },
+      };
     });
   };
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState({ type: "", message: "" });
+  ////submit to update profile data
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    let data = {
+      fullName: input.fullName,
+      email: input.email,
+      phone: input.phone,
+      birthday: input.birthday,
+      gender: input.gender,
+      address: {
+        city: input.address.city,
+        address: input.address.address,
+        zipcode: input.address.zipcode,
+        country: input.address.country,
+      },
+    };
+    const res = await updateProfile(user._id, data);
+    setUser(res.data.data);
+  };
 
+  // submit for update password form
   const updatePasswordForm = (e) => {
     e.preventDefault();
     if (!newPassword || !confirmPassword || !currentPassword) {
@@ -532,37 +524,76 @@ function Dashboard() {
                   <h4>Your profile</h4>
                   <ul id="profile_summary">
                     <li>
-                      Full Name <span>{input.fullName}</span>
+                      Full Name <span>{user?.fullName}</span>
                     </li>
                     <li>
-                      Email <span>{input.email}</span>
+                      Email <span>{user?.email}</span>
                     </li>
                     <li>
-                      Phone number <span>{input?.phone}</span>
+                      Phone number <span>{user?.phone}</span>
                     </li>
                     <li>
-                      Date of birth{" "}
+                      Date of birth
                       <span>
-                        {moment(input?.birthday).format("DD-MMMM-yyyy")}
+                        {user?.birthday ? (
+                          moment(user?.birthday).format("DD-MMMM-yyyy")
+                        ) : (
+                          <div style={{ color: "red" }}>Not Provided</div>
+                        )}
                       </span>
                     </li>
                     <li>
-                      Gender <span>{input?.gender}</span>
+                      Gender{" "}
+                      <span>
+                        {user?.gender ? (
+                          user.gender
+                        ) : (
+                          <div style={{ color: "red" }}>Not Provided</div>
+                        )}
+                      </span>
                     </li>
                     <li>
-                      Address <span>{input?.address?.address}</span>
+                      Address{" "}
+                      <span>
+                        {user?.address?.address ? (
+                          user?.address?.address
+                        ) : (
+                          <div style={{ color: "red" }}>Not Provided</div>
+                        )}
+                      </span>
                     </li>
                     <li>
-                      Town/City <span>{input?.address?.city}</span>
+                      Town/City{" "}
+                      <span>
+                        {user?.address?.city ? (
+                          user?.address?.city
+                        ) : (
+                          <div style={{ color: "red" }}>Not Provided</div>
+                        )}
+                      </span>
                     </li>
                     <li>
-                      Zip code <span>{input?.address?.zipcode}</span>
+                      Zip code{" "}
+                      <span>
+                        {user?.address?.zipcode ? (
+                          user?.address?.zipcode
+                        ) : (
+                          <div style={{ color: "red" }}>Not Provided</div>
+                        )}
+                      </span>
                     </li>
                     <li>
-                      Country <span>{input?.address?.country}</span>
+                      Country{" "}
+                      <span>
+                        {user?.address?.country ? (
+                          user?.address?.country
+                        ) : (
+                          <div style={{ color: "red" }}>Not Provided</div>
+                        )}
+                      </span>
                     </li>
                     <li>
-                      Verified <span>{input?.isVerified ? "Yes" : "No"}</span>
+                      Verified <span>{user?.isVerified ? "Yes" : "No"}</span>
                     </li>
                   </ul>
                 </div>
@@ -570,9 +601,7 @@ function Dashboard() {
                   <div className="row">
                     <div className="col-md-12">
                       <img
-                        src={`${
-                          input.avatar?.url || "img/tourist_guide_pic.jpg"
-                        }`}
+                        src={`${user?.avatar?.url || "img/avatar.png"}`}
                         alt="Profile picture"
                         className="img-fluid styled profile_pic"
                         width="250"
@@ -580,7 +609,7 @@ function Dashboard() {
                       />
                     </div>
                   </div>
-                  <div className="row">
+                  {/* <div className="row">
                     <div className="col-md-6 offset-md-6">
                       <input
                         type="file"
@@ -588,7 +617,7 @@ function Dashboard() {
                         onChange={handleProfilePicChange}
                       />
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -606,7 +635,7 @@ function Dashboard() {
                         name="fullName"
                         type="text"
                         onChange={handleChange}
-                        value={input.fullName}
+                        value={input?.fullName}
                       />
                     </div>
                   </div>
@@ -615,7 +644,7 @@ function Dashboard() {
                       <label>Email</label>
                       <input
                         className="form-control"
-                        value={input.email}
+                        value={input?.email}
                         type="email"
                         disabled
                       />
@@ -632,7 +661,7 @@ function Dashboard() {
                         name="phone"
                         type="text"
                         onChange={handleChange}
-                        value={input.phone}
+                        value={input?.phone}
                       />
                     </div>
                   </div>
@@ -646,7 +675,7 @@ function Dashboard() {
                         name="birthday"
                         type="date"
                         onChange={handleChange}
-                        value={input.birthday}
+                        value={input?.birthday}
                       />
                     </div>
                   </div>
@@ -658,8 +687,9 @@ function Dashboard() {
                         className="form-control"
                         name="gender"
                         onChange={handleChange}
-                        value={input.gender}
+                        value={input?.gender}
                       >
+                        <option value="">Select Gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                         <option value="Others">Others</option>
@@ -674,7 +704,7 @@ function Dashboard() {
                         name="country"
                         type="text"
                         onChange={handleAddressChange}
-                        value={input.address?.country}
+                        value={input?.address?.country}
                       />
                       {/* <select id='country' className='form-control' name='country'>
 											<option value=''>Select...</option>
@@ -696,7 +726,7 @@ function Dashboard() {
                         name="address"
                         type="text"
                         onChange={handleAddressChange}
-                        value={input.address?.address}
+                        value={input?.address?.address}
                       />
                     </div>
                   </div>
@@ -708,7 +738,7 @@ function Dashboard() {
                         name="city"
                         type="text"
                         onChange={handleAddressChange}
-                        value={input.address?.city}
+                        value={input?.address?.city}
                       />
                     </div>
                   </div>
@@ -720,7 +750,7 @@ function Dashboard() {
                         name="zipcode"
                         type="text"
                         onChange={handleAddressChange}
-                        value={input.address?.zipcode}
+                        value={input?.address?.zipcode}
                       />
                     </div>
                   </div>
@@ -743,7 +773,13 @@ function Dashboard() {
                 <hr />
                 <div className="row">
                   <div className="col-md-12">
-                    <button type="submit" className="btn btn-info float-right">
+                    <button
+                      type="submit"
+                      className="btn btn-info float-right"
+                      disabled={
+                        !input?.fullName || !input?.email || !input?.phone
+                      }
+                    >
                       Update Profile
                     </button>
                   </div>

@@ -3,6 +3,7 @@ import axios from "axios";
 const request = axios.create({
   headers: { "Content-Type": "application/json" },
   transformResponse: [(res) => JSON.parse(res)],
+  withCredentials: true,
 });
 
 request.defaults.baseURL =
