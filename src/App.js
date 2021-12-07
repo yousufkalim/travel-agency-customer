@@ -13,6 +13,7 @@ import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 import NotFound from "./components/NotFound";
 import TripsList from "./components/trips/TripsList"; ///all trips
+import AgencyTrips from "./components/trips/AgencyTrips"; ///all trips
 import { toast } from "react-toastify"; /////to show toast messages
 import "react-toastify/dist/ReactToastify.css"; ////toast message css
 
@@ -29,6 +30,7 @@ function App() {
         <Switch>
           <Route path="/" component={Homepage} exact />
           <Route path="/triplist" component={TripsList} exact />{" "}
+          <Route path="/AgencyTrips/:id" component={AgencyTrips} exact />{" "}
           {/* route to show all trips */}
           <Route path="/auth/login" component={Login} />
           <Route path="/auth/register" component={Register} />

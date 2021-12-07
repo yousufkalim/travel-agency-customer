@@ -1,13 +1,23 @@
-import { Link } from "react-router-dom";
-import AddToWish from "./Trip/AddToWish";
-import Rating from "./Trip/Rating";
+import { useState, useEffect } from "react";
+import { ListGroup, Badge } from "react-bootstrap";
+import { allAgencies } from "../../services/api";
+import { useHistory } from "react-router";
 
 export default function CityTour({ trip }) {
+  const history = useHistory();
+  const [agency, setAgency] = useState([]);
+
+  useEffect(async () => {
+    allAgencies().then((res) => {
+      setAgency(res.data.data);
+    });
+  }, []);
+
   return (
     <div class="container margin_60">
       <div class="main_title">
         <h2>
-          Paris <span>Top</span> Tours
+          LIST <span>OF</span> AGENCIES
         </h2>
         <p>
           Quisque at tortor a libero posuere laoreet vitae sed arcu. Curabitur
@@ -16,53 +26,44 @@ export default function CityTour({ trip }) {
       </div>
 
       <div class="row add_bottom_30">
-        {trip.map((trip) => (
-          <div class="item col-md-4">
-            <div class="tour_container">
-              <div class="ribbon_3 popular">
-                <span>Book Now</span>
-              </div>
-              <div class="img_container">
-                <a href={`/tour/${trip.city}/${trip._id}`}>
-                  <img
-                    src={trip.banner?.url}
-                    class="img-fluid"
-                    alt="Trip Banner"
-                  />
-                  <div class="badge_save">
-                    Lets<strong>Go</strong>
-                  </div>
-                  <div class="short_info">
-                    <i class="icon_set_1_icon-44"></i>Historic Buildings
-                    <span class="price">
-                      <sup>$</sup>
-                      {/* display price according to category */}
-                      {trip.category === "Single Day"
-                        ? trip.adultPrice
-                        : trip.category === "Multiple Day"
-                        ? trip.bedroom.double
-                        : trip.interior.adultPrice}
-                    </span>
-                  </div>
-                </a>
-              </div>
-              <div class="tour_title">
-                <h3>
-                  <strong>{trip.name}</strong> tour
-                </h3>
-                {/* <Rating value={4} count={50} />
-                <AddToWish /> */}
-              </div>
-            </div>
-          </div>
-        ))}
+        <ListGroup
+          as="ol"
+          numbered
+          style={{
+            width: "80%",
+            height: "350px",
+            overflow: "scroll",
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        >
+          {agency.map((item) => {
+            let tripCount = 0;
+            return (
+              <ListGroup.Item
+                as="li"
+                className="d-flex justify-content-between align-items-start"
+                style={{ cursor: "pointer" }}
+                onClick={() => history.push(`/AgencyTrips/${item._id}`)}
+              >
+                <div className="ms-2 me-auto">
+                  <div className="fw-bold">{item.fullName}</div>
+                  {item.email}
+                </div>
+                {trip.map((item2) => {
+                  if (item._id === item2.agency) {
+                    tripCount += 1;
+                  }
+                })}
+                {console.log("tripCount: ", tripCount)}
+                <Badge variant="primary" pill>
+                  Trips: {tripCount}
+                </Badge>
+              </ListGroup.Item>
+            );
+          })}
+        </ListGroup>
       </div>
-
-      <p class="text-center add_bottom_30">
-        <a href="all_tours_list.html" class="btn_1">
-          View all Tours
-        </a>
-      </p>
     </div>
   );
 }
