@@ -7,6 +7,7 @@ const Topbar = (props) => {
   const handleSingOut = () => {
     auth.logout(() => {
       props.history.push("/auth/login");
+      localStorage.removeItem("token");
     });
   };
   return (

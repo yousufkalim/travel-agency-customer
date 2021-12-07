@@ -4,6 +4,10 @@ const request = axios.create({
   headers: { "Content-Type": "application/json" },
   transformResponse: [(res) => JSON.parse(res)],
 });
+const token = localStorage.getItem("token");
+axios.defaults.headers = {
+  Authorization: `Bearer ${token}`,
+};
 
 request.defaults.baseURL =
   window.location.hostname === "localhost"
