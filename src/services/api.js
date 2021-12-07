@@ -17,11 +17,6 @@ const addTrip = (payload) => {
     headers: { Authorization: `Bearer ${Cookies.get("AUTH-TOKEN")}` },
   });
 };
-const updateProfile = (payload) => {
-  return request.put("/auth/updatedetails", payload, {
-    headers: { Authorization: `Bearer ${Cookies.get("AUTH-TOKEN")}` },
-  });
-};
 const profile = () => {
   return request.get("/auth/profile", {
     headers: { Authorization: `Bearer ${Cookies.get("AUTH-TOKEN")}` },
@@ -59,7 +54,21 @@ const addBooking = (payload, id) => {
 // checkout action
 export const checkout = async (payload) => {
   return request.post("/bookings/checkout", payload, {
-    withCredentials: true,
+    headers: { Authorization: `Bearer ${Cookies.get("AUTH-TOKEN")}` },
+  });
+};
+
+// get current user
+export const getUser = (id) => {
+  return request.get(`/users/${id}`, {
+    headers: { Authorization: `Bearer ${Cookies.get("AUTH-TOKEN")}` },
+  });
+};
+
+// update profile
+export const updateProfile = (id, payload) => {
+  return request.put(`/auth/updateAgencyProfile/${id}`, payload, {
+    headers: { Authorization: `Bearer ${Cookies.get("AUTH-TOKEN")}` },
   });
 };
 
@@ -73,9 +82,10 @@ export default {
   getTripById,
   newBooking,
   profile,
-  updateProfile,
   updatePassword,
   updateAvatar,
   addBooking,
   checkout,
+  getUser,
+  updateProfile,
 };
