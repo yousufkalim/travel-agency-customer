@@ -5,6 +5,10 @@ const request = axios.create({
   transformResponse: [(res) => JSON.parse(res)],
   withCredentials: true,
 });
+const token = localStorage.getItem("token");
+axios.defaults.headers = {
+  Authorization: `Bearer ${token}`,
+};
 
 request.defaults.baseURL =
   window.location.hostname === "localhost"
