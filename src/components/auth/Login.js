@@ -30,6 +30,7 @@ function Login(props) {
         .then((res) => {
           setLoading(false);
           const token = res.data.token;
+          localStorage.setItem("token", token);
           Cookies.set("AUTH-TOKEN", token, { expires: 30 });
           auth.login(() => props.history.push("/dashboard"));
         })
