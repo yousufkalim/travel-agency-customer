@@ -47,7 +47,7 @@ export default function CityTour({ trip }) {
                 onClick={() => history.push(`/AgencyTrips/${item._id}`)}
               >
                 <div className="ms-2 me-auto">
-                  <div className="fw-bold">{item.fullName}</div>
+                  <div className="fw-bold">{item.agencyName}</div>
                   {item.email}
                 </div>
                 {trip.map((item2) => {
@@ -55,7 +55,6 @@ export default function CityTour({ trip }) {
                     tripCount += 1;
                   }
                 })}
-                {console.log("tripCount: ", tripCount)}
                 <Badge variant="primary" pill>
                   Trips: {tripCount}
                 </Badge>

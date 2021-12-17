@@ -181,21 +181,21 @@ const MultipleDayBooking = ({ trip }) => {
         data.adult = adultData;
         data.children = childData;
         data.totalCost =
-          totalChilds * trip.childPrice * totalAdults * trip.adultPrice;
+          totalChilds * trip.childPrice + totalAdults * trip.adultPrice;
       } else if (trip?.category === "Multiple Day") {
         data.adult = adultData;
         data.children = childData;
         data.totalCost =
           inputFields?.length === 2
             ? trip?.bedroom &&
-              trip?.bedroom[inputFields[0]?.bedrooms] *
+              trip?.bedroom[inputFields[0]?.bedrooms] +
                 trip?.bedroom[inputFields[1]?.bedrooms]
             : trip?.bedroom && trip?.bedroom[inputFields[0]?.bedrooms];
       } else {
         data.adult = adultData;
         data.children = childData;
         data.totalCost =
-          totalChilds * cabin.childPrice * totalAdults * cabin.adultPrice;
+          totalChilds * cabin.childPrice + totalAdults * cabin.adultPrice;
       }
 
       const result = await API.addBooking(data, trip._id);
@@ -296,13 +296,31 @@ const MultipleDayBooking = ({ trip }) => {
                     <option value="" selected disabled>
                       Select Room
                     </option>
-                    <option value="double">
-                      Double | ${trip?.bedroom?.double}
-                    </option>
-                    <option value="single">
-                      Single | ${trip?.bedroom?.single}
-                    </option>
-                    <option value="twin">Twin | ${trip?.bedroom?.twin}</option>
+                    {trip.category === "Multiple Day" ? (
+                      <>
+                        <option value="double">
+                          Double | ${trip?.bedroom?.double}
+                        </option>
+                        <option value="single">
+                          Single | ${trip?.bedroom?.single}
+                        </option>
+                        <option value="twin">
+                          Twin | ${trip?.bedroom?.twin}
+                        </option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="double">
+                          Double | ${trip?.adultPrice} | ${trip?.childPrice}
+                        </option>
+                        <option value="single">
+                          Single | ${trip?.adultPrice} | ${trip?.childPrice}
+                        </option>
+                        <option value="twin">
+                          Twin | ${trip?.adultPrice} | ${trip?.childPrice}
+                        </option>
+                      </>
+                    )}
                   </select>
                   {/* if room exist select number of adults and childs */}
                   {inputField.bedrooms && (
@@ -840,10 +858,8 @@ const MultipleDayBooking = ({ trip }) => {
                               <td>Total cost</td>
                               <td className="text-right">
                                 ${" "}
-                                {totalChilds *
-                                  trip.childPrice *
-                                  totalAdults *
-                                  trip.adultPrice}
+                                {totalChilds * trip.childPrice +
+                                  totalAdults * trip.adultPrice}
                               </td>
                             </tr>
                           </>
@@ -869,7 +885,7 @@ const MultipleDayBooking = ({ trip }) => {
                                 ${" "}
                                 {inputFields?.length === 2
                                   ? trip?.bedroom &&
-                                    trip?.bedroom[inputFields[0]?.bedrooms] *
+                                    trip?.bedroom[inputFields[0]?.bedrooms] +
                                       trip?.bedroom[inputFields[1]?.bedrooms]
                                   : trip?.bedroom &&
                                     trip?.bedroom[inputFields[0]?.bedrooms]}
@@ -896,10 +912,8 @@ const MultipleDayBooking = ({ trip }) => {
                               <td>Total cost</td>
                               <td className="text-right">
                                 ${" "}
-                                {totalChilds *
-                                  cabin.childPrice *
-                                  totalAdults *
-                                  cabin.adultPrice}
+                                {totalChilds * cabin.childPrice +
+                                  totalAdults * cabin.adultPrice}
                               </td>
                             </tr>
                           </>
