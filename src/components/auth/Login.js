@@ -31,6 +31,9 @@ function Login(props) {
           setLoading(false);
           const token = res.data.token;
           localStorage.setItem("token", token);
+          axios.defaults.headers = {
+            Authorization: `Bearer ${token}`,
+          };
           Cookies.set("AUTH-TOKEN", token, { expires: 30 });
           auth.login(() => props.history.push("/dashboard"));
         })
